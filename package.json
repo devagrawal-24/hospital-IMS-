@@ -1,0 +1,13 @@
+{
+    "name": "hospital_ims_fullstack",
+    "version": "1.0.0",
+    "description": "Fullstack Hospital IMS",
+    "scripts": {
+        "start": "concurrently \"npm run server --prefix backend_IMS\" \"npm run dev --prefix frontend_IMS\"",
+        "build": "npm install --prefix frontend_IMS && npm run build --prefix frontend_IMS",
+        "install-all": "npm install && npm install --prefix backend_IMS && npm install --prefix frontend_IMS"
+    },
+    "dependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

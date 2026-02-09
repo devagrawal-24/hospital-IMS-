@@ -1,0 +1,5 @@
+{
+  "name": "MediCore IMS(final)",
+  "description": "A comprehensive Hospital Information Management System with role-based dashboards for Admins, Doctors, Nurses, and Staff.",
+  "requestFramePermissions": []
+}
