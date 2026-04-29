@@ -9,7 +9,11 @@ const { notFound, errorHandler } = require('./src/middlewares/errorMiddleware');
 dotenv.config();
 
 // Connect to database
-connectDB();
+connectDB().then(async () => {
+    // Seed the database since we are using an in-memory DB or a fresh start
+    const seedData = require('./seedData');
+    await seedData();
+});
 
 const app = express();
 

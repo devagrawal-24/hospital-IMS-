@@ -198,22 +198,31 @@ const App: React.FC = () => {
   const handleSendMessage = (content: string, toUserId: string = 'ADMIN') => {
     if (!user) return;
 
+    // Resolve 'ADMIN' to actual admin ID if possible
+    let targetId = toUserId;
+    if (toUserId === 'ADMIN') {
+      const adminUser = users.find(u => u.role === 'ADMIN');
+      if (adminUser) {
+        targetId = adminUser.id;
+      }
+    }
+
     const newMessage: Message = {
       id: `m${Date.now()}`,
       fromUserId: user.id,
       fromUserName: user.name,
       fromUserRole: user.role,
-      toUserId: toUserId,
+      toUserId: targetId,
       content: content,
       timestamp: new Date().toISOString(),
       read: false
     };
 
     // Add to local state immediately for UI
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
 
     // Also save to backend
-    sendMessageToBackend(content, toUserId).catch(error => {
+    sendMessageToBackend(content, targetId).catch(error => {
       console.error('Failed to send message:', error);
     });
   };
@@ -235,7 +244,7 @@ const App: React.FC = () => {
       }));
 
     // Add to local state
-    setMessages([...messages, ...newMessages]);
+    setMessages(prev => [...prev, ...newMessages]);
 
     // Save each announcement to backend
     newMessages.forEach(msg => {

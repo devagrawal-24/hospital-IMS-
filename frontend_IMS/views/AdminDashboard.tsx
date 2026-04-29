@@ -112,9 +112,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const map = new Map<string, Message[]>();
     
     messages.forEach(msg => {
-        // Group messages by the OTHER person (not admin)
-        const otherId = msg.fromUserRole === 'ADMIN' ? msg.toUserId : msg.fromUserId;
+        // Group messages by the OTHER person (not this admin)
+        const otherId = msg.fromUserId === user.id ? msg.toUserId : msg.fromUserId;
         
+        // Skip if otherId is still the admin (e.g. self-message or 'ADMIN' string)
+        if (otherId === user.id || otherId === 'ADMIN') {
+            // Try to find if this message was sent TO me but from a different ID
+            if (msg.fromUserId !== user.id) {
+                const senderId = msg.fromUserId;
+                if (!map.has(senderId)) map.set(senderId, []);
+                map.get(senderId)?.push(msg);
+            }
+            return;
+        }
+
         if (!map.has(otherId)) {
             map.set(otherId, []);
         }
@@ -125,8 +136,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const otherUser = users.find(u => u.id === userId);
         const sortedMsgs = msgs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         const lastMsg = sortedMsgs[sortedMsgs.length - 1];
-        // Count unread messages sent TO admin (received by admin)
-        const unreadCount = sortedMsgs.filter(m => !m.read && m.toUserId === 'ADMIN' && m.fromUserRole !== 'ADMIN').length;
+        // Count unread messages sent TO me (the current admin)
+        const unreadCount = sortedMsgs.filter(m => !m.read && (m.toUserId === user.id || m.toUserId === 'ADMIN') && m.fromUserId !== user.id).length;
 
         return {
             userId,
@@ -136,7 +147,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             unreadCount
         };
     }).sort((a, b) => new Date(b.lastMsg.timestamp).getTime() - new Date(a.lastMsg.timestamp).getTime());
-  }, [messages, users]);
+  }, [messages, users, user.id]);
 
   // --- RENDER FUNCTIONS ---
 
@@ -165,7 +176,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         const conversation = conversations.find(c => c.userId === userId);
         if (conversation) {
             conversation.messages
-                .filter(m => !m.read && m.toUserId === 'ADMIN')
+                .filter(m => !m.read && (m.toUserId === 'ADMIN' || m.toUserId === user.id))
                 .forEach(m => onMarkAsRead(m.id));
         }
     };

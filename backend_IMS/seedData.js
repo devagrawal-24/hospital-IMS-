@@ -215,11 +215,22 @@ const seedData = async () => {
         console.log('Nurse: nurse / password123');
         console.log('Staff: staff / password123');
 
-        process.exit(0);
+        if (require.main === module) {
+            process.exit(0);
+        }
     } catch (error) {
         console.error(`❌ Error seeding data: ${error.message}`);
-        process.exit(1);
+        if (require.main === module) {
+            process.exit(1);
+        } else {
+            throw error;
+        }
     }
 };
 
-seedData();
+if (require.main === module) {
+    connectDB();
+    seedData();
+}
+
+module.exports = seedData;

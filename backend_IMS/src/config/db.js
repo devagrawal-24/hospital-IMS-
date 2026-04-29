@@ -5,7 +5,10 @@ let mongoUri;
 
 const connectDB = async () => {
     try {
-        if (!mongoUri) {
+        if (process.env.MONGO_URI) {
+            mongoUri = process.env.MONGO_URI;
+        } else if (!mongoUri) {
+            console.log('No MONGO_URI found, using MongoMemoryServer');
             const mongoServer = await MongoMemoryServer.create();
             mongoUri = mongoServer.getUri();
         }
